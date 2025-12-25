@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Все рейсы в/из города</h2>
+<form method="post">
+    <div class="row g-3">
+        <div class="col-md-6 autocomplete-container">
+            <label class="form-label">Город</label>
+            <input type="text" name="city" class="form-control autocomplete" data-type="city" required>
+        </div>
+        <div class="col-md-6 autocomplete-container">
+            <label class="form-label">Страна</label>
+            <input type="text" name="country" class="form-control autocomplete" data-type="country" required>
+        </div>
+    </div>
+    <button type="submit" class="btn btn-primary mt-4">Искать</button>
+</form>
+{% endblock %}

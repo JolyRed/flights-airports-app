@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2 class="mb-4 text-center">{{ title }}</h2>
+        <p class="text-center text-muted mb-5">Найдено записей: <strong>{{ total }}</strong></p>
+    </div>
+</div>
+
+{% if items %}
+<div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+    {% for item in items %}
+    <div class="col">
+        <div class="card h-100">
+            <div class="card-header text-white">
+                <i class="fas fa-plane-departure me-2"></i>
+                {% if type == "airport" %}
+                    {{ item.name }} ({{ item.iata or item.icao or "N/A" }})
+                {% elif type == "route" %}
+                    {{ item.airline.name if item.airline else item.airline_code }} — рейс
+                {% elif type == "connecting" %}
+                    Стыковка через {{ item.via }} ({{ item.via_city }})
+                {% endif %}
+            </div>
+            <div class="card-body">
+                {% if type == "airport" %}
+                    <p class="card-text">
+                        <strong>Город:</strong> {{ item.city }}<br>
+                        <strong>Страна:</strong> {{ item.country }}<br>
+                        <strong>Координаты:</strong> {{ item.latitude|round(4) }}, {{ item.longitude|round(4) }}<br>
+                        {% if item.iata %}<strong>IATA:</strong> {{ item.iata }}{% endif %}
+                        {% if item.icao %} | <strong>ICAO:</strong> {{ item.icao }}{% endif %}
+                    </p>
+                {% elif type == "route" %}
+                    <p class="card-text">
+                        <strong>Откуда:</strong> {{ item.source.city }} ({{ item.source.iata or item.source.icao }})<br>
+                        <strong>Куда:</strong> {{ item.dest.city }} ({{ item.dest.iata or item.dest.icao }})<br>
+                        <strong>Авиакомпания:</strong> {{ item.airline.name if item.airline else item.airline_code }}<br>
+                        <strong>Остановки:</strong> {{ item.stops }}
+                    </p>
+                {% elif type == "connecting" %}
+                    <p class="card-text">
+                        <strong>Откуда:</strong> {{ item.from_city }} ({{ item.from1 }})<br>
+                        <strong>Первый сегмент:</strong> {{ item.from1 }} → {{ item.via }} ({{ item.airline1 }})<br>
+                        <strong>Пересадка в:</strong> {{ item.via_city }} ({{ item.via }})<br>
+                        <strong>Второй сегмент:</strong> {{ item.via }} → {{ item.to }} ({{ item.airline2 }})<br>
+                        <strong>Куда:</strong> {{ item.to_city }} ({{ item.to }})
+                    </p>
+                {% endif %}
+            </div>
+            <div class="card-footer text-muted small">
+                {% if type == "airport" %}
+                    {% if item.altitude is not none %}
+                        Высота: {{ item.altitude }} м
+                    {% else %}
+                        Высота: не указана
+                    {% endif %}
+                    {% if item.timezone is not none %}
+                        | Часовой пояс: UTC{% if item.timezone >= 0 %}+{% endif %}{{ item.timezone|round(2) }}
+                    {% else %}
+                        {% if item.altitude is not none %} | {% endif %}Часовой пояс: не указан
+                    {% endif %}
+                {% elif type == "route" %}
+                    Оборудование: {{ item.equipment|default("Не указано") }}
+                {% elif type == "connecting" %}
+                    Рейс с одной пересадкой (два сегмента)
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Пагинация -->
+<nav class="mt-5">
+    <ul class="pagination justify-content-center">
+        {% if page > 1 %}
+            <li class="page-item">
+                <a class="page-link" href="{{ request.url.include_query_params(page=page-1) }}">« Назад</a>
+            </li>
+        {% endif %}
+
+        {% set visible = 5 %}
+        {% set start = [page - 2, 1] | max %}
+        {% set end = [start + visible - 1, pages] | min %}
+
+        {% if start > 1 %}
+            <li class="page-item"><a class="page-link" href="{{ request.url.include_query_params(page=1) }}">1</a></li>
+            {% if start > 2 %}<li class="page-item disabled"><span class="page-link">...</span></li>{% endif %}
+        {% endif %}
+
+        {% for p in range(start, end + 1) %}
+            <li class="page-item {% if p == page %}active{% endif %}">
+                <a class="page-link" href="{{ request.url.include_query_params(page=p) }}">{{ p }}</a>
+            </li>
+        {% endfor %}
+
+        {% if end < pages %}
+            {% if end < pages - 1 %}<li class="page-item disabled"><span class="page-link">...</span></li>{% endif %}
+            <li class="page-item"><a class="page-link" href="{{ request.url.include_query_params(page=pages) }}">{{ pages }}</a></li>
+        {% endif %}
+
+        {% if page < pages %}
+            <li class="page-item">
+                <a class="page-link" href="{{ request.url.include_query_params(page=page+1) }}">Вперёд »</a>
+            </li>
+        {% endif %}
+    </ul>
+</nav>
+
+{% else %}
+<div class="text-center py-5">
+    <i class="fas fa-search fa-5x text-muted mb-4"></i>
+    <h3 class="text-muted">Ничего не найдено</h3>
+    <p class="text-muted">Попробуйте изменить параметры поиска или расширить диапазон.</p>
+</div>
+{% endif %}
+
+<div class="text-center mt-5">
+    <a href="/" class="btn btn-outline-primary btn-lg px-5">
+        <i class="fas fa-home me-2"></i> На главную
+    </a>
+</div>
+{% endblock %}

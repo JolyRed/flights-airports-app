@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Прямые рейсы между двумя городами</h2>
+<form method="post">
+    <h5 class="mt-4">Первый город</h5>
+    <div class="row g-3 mb-3">
+        <div class="col-md-6 autocomplete-container">
+            <label class="form-label">Город</label>
+            <input type="text" name="city1" class="form-control autocomplete" data-type="city" placeholder="Город" required>
+        </div>
+        <div class="col-md-6 autocomplete-container">
+            <label class="form-label">Страна</label>
+            <input type="text" name="country1" class="form-control autocomplete" data-type="country" placeholder="Страна" required>
+        </div>
+    </div>
+
+    <h5>Второй город</h5>
+    <div class="row g-3">
+        <div class="col-md-6 autocomplete-container">
+            <label class="form-label">Город</label>
+            <input type="text" name="city2" class="form-control autocomplete" data-type="city" placeholder="Город" required>
+        </div>
+        <div class="col-md-6 autocomplete-container">
+            <label class="form-label">Страна</label>
+            <input type="text" name="country2" class="form-control autocomplete" data-type="country" placeholder="Страна" required>
+        </div>
+    </div>
+    <button type="submit" class="btn btn-primary mt-4">Искать</button>
+</form>
+{% endblock %}
